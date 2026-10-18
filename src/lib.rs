@@ -26,13 +26,32 @@ where
         }
         Polynomial(d)
     }
-    pub fn eval(&self, mut x: f32) -> f32 {
+    pub fn eval_re(&self, mut x: f32) -> f32 {
         let mut s = self.0[0];
         for k in self.0.iter().skip(1) {
             s += x * k;
             x *= x;
         }
         s
+    }
+    pub fn eval(&self, mut x: Complex<f32>) -> Complex<f32> {
+        let mut s = self.0[0].into();
+        for k in self.0.iter().skip(1) {
+            s += x * k;
+            x *= x;
+        }
+        s
+    }
+    pub fn newton_method(
+        &self,
+        d: &Polynomial<Sub1<N>>,
+        mut x: Complex<f32>,
+        n: usize,
+    ) -> Complex<f32> {
+        for _ in 0..n {
+            x -= self.eval(x) / d.eval(x);
+        }
+        x
     }
 }
 
@@ -68,11 +87,11 @@ mod tests {
         assert_eq!(p.der(), Polynomial(arr![1.0, 2.0]));
     }
     #[test]
-    fn test_eval() {
+    fn test_eval_re() {
         let p = Polynomial(arr![1.0, 1.0, 1.0]);
-        assert_eq!(p.eval(0.0), 1.0);
-        assert_eq!(p.eval(1.0), 3.0);
-        assert_eq!(p.eval(2.0), 7.0);
+        assert_eq!(p.eval_re(0.0), 1.0);
+        assert_eq!(p.eval_re(1.0), 3.0);
+        assert_eq!(p.eval_re(2.0), 7.0);
     }
     #[test]
     fn test_roots_quadratic() {
