@@ -1,9 +1,12 @@
-use std::ops::Sub;
+#![no_std]
+use core::ops::Sub;
 
 use generic_array::{
     ArrayLength, GenericArray,
-    typenum::{B1, Sub1},
+    typenum::{B1, Sub1, U3},
 };
+use libm::sqrtf;
+use num::{Complex, complex::c32};
 
 #[derive(Debug, PartialEq)]
 pub struct Polynomial<N: ArrayLength>(GenericArray<f32, N>);
@@ -33,22 +36,49 @@ where
     }
 }
 
+impl Polynomial<U3> {
+    pub fn roots(&self) -> [Complex<f32>; 2] {
+        let d = self.0[1] * self.0[1] - 4.0 * self.0[0] * self.0[2];
+        let sqrt_d = sqrtf(d.abs());
+        if d < 0.0 {
+            [
+                (-self.0[1] + c32(0.0, sqrt_d)) / (2.0 * self.0[0]),
+                (-self.0[1] - c32(0.0, sqrt_d)) / (2.0 * self.0[0]),
+            ]
+        } else {
+            [
+                c32((-self.0[1] + sqrt_d) / (2.0 * self.0[0]), 0.0),
+                c32((-self.0[1] - sqrt_d) / (2.0 * self.0[0]), 0.0),
+            ]
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use generic_array::arr;
 
     use crate::Polynomial;
+    extern crate std;
+    use std::dbg;
 
     #[test]
-    pub(crate) fn test_der() {
+    fn test_der() {
         let p = Polynomial::new(arr![1.0, 1.0, 1.0]);
         assert_eq!(p.der(), Polynomial(arr![1.0, 2.0]));
     }
     #[test]
-    pub(crate) fn test_eval() {
+    fn test_eval() {
         let p = Polynomial(arr![1.0, 1.0, 1.0]);
         assert_eq!(p.eval(0.0), 1.0);
         assert_eq!(p.eval(1.0), 3.0);
         assert_eq!(p.eval(2.0), 7.0);
+    }
+    #[test]
+    fn test_roots_quadratic() {
+        let p = Polynomial::new(arr![1.0, 3.0, 2.0]);
+        // assert_eq!(p.der(), Polynomial(arr![1.0, 2.0]));
+        let r = p.roots();
+        dbg!(r);
     }
 }

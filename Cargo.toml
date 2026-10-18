@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 generic-array = "1.4.5"
+libm = "0.2.16"
+num = { version = "0.4.3", default-features = false }
