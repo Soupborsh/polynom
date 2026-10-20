@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+approx = { version = "0.5.1", default-features = false, features = ["num-complex"] }
 generic-array = "1.4.5"
 libm = "0.2.16"
 num = { version = "0.4.3", default-features = false }
