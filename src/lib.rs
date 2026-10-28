@@ -49,6 +49,18 @@ where
         }
         Polynomial(d)
     }
+    // Gorner
+    // pub fn div_by_root(&self, x: Complex<f32>) -> Polynomial<Sub1<N>> {
+    //     let mut d = GenericArray::<f32, Sub1<N>>::default();
+    //     *d.last_mut().unwrap() = *self.0.last().unwrap();
+    //     for (i, k) in d.iter_mut().rev().skip(1).enumerate() {
+    //         *k = self.0[i] + d[i - 1] * x;
+    //     }
+    //     // for (i, k) in d.iter_mut().enumerate() {
+    //     //     *k = self.0[i + 1] * (i + 1) as f32;
+    //     // }
+    //     Polynomial(d)
+    // }
     pub fn newton_method(
         &self,
         d: &Polynomial<Sub1<N>>,
