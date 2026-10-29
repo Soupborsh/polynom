@@ -5,7 +5,7 @@ use generic_array::{
     ArrayLength, GenericArray,
     typenum::{B1, Sub1, U3},
 };
-use libm::sqrtf;
+use itertools::Itertools;
 use num::Complex;
 
 #[derive(Debug, PartialEq)]
@@ -69,23 +69,10 @@ where
 
 impl Polynomial<U3> {
     pub fn roots(&self) -> [Complex<f32>; 2] {
-        let d: Complex<f32> = self.0[1] * self.0[1] - 4.0 * self.0[0] * self.0[2];
+        let (c, b, a) = self.0.iter().collect_tuple().unwrap();
+        let d: Complex<f32> = b * b - 4.0 * c * a;
         let sqrt_d = d.sqrt();
-        [
-            (-self.0[1] + sqrt_d) / (2.0 * self.0[0]),
-            (-self.0[1] - sqrt_d) / (2.0 * self.0[0]),
-        ]
-        // if d < 0.0 {
-        //     [
-        //         (-self.0[1] + c32(0.0, sqrt_d)) / (2.0 * self.0[0]),
-        //         (-self.0[1] - c32(0.0, sqrt_d)) / (2.0 * self.0[0]),
-        //     ]
-        // } else {
-        //     [
-        //         c32((-self.0[1] + sqrt_d) / (2.0 * self.0[0]), 0.0),
-        //         c32((-self.0[1] - sqrt_d) / (2.0 * self.0[0]), 0.0),
-        //     ]
-        // }
+        [(-b + sqrt_d) / (2.0 * a), (-b - sqrt_d) / (2.0 * a)]
     }
 }
 
@@ -106,27 +93,29 @@ mod tests {
 
     use crate::{Polynomial, c32, cr};
     extern crate std;
-    use std::dbg;
+    // use std::dbg;
 
     #[test]
     fn test_der() {
         let p = Polynomial::new(arr![cr(1.0), cr(1.0), cr(1.0)]);
         assert_eq!(p.der(), Polynomial(arr![cr(1.0), cr(2.0)]));
     }
-    // #[test]
-    // fn test_eval_re() {
-    //     let p = Polynomial(arr![1.0, 1.0, 1.0]);
-    //     assert_eq!(p.eval_re(0.0), 1.0);
-    //     assert_eq!(p.eval_re(1.0), 3.0);
-    //     assert_eq!(p.eval_re(2.0), 7.0);
-    //     let p = Polynomial(arr![1.0, 1.0, 1.0, 1.0]);
-    //     assert_eq!(p.eval_re(-1.0), 0.0);
-    // }
+    #[test]
+    fn test_eval() {
+        let p = Polynomial(arr![cr(1.0), cr(1.0), cr(1.0)]);
+        assert_eq!(p.eval(cr(0.0)), cr(1.0));
+        assert_eq!(p.eval(cr(1.0)), cr(3.0));
+        assert_eq!(p.eval(cr(2.0)), cr(7.0));
+        let p = Polynomial(arr![cr(1.0), cr(1.0), cr(1.0), cr(1.0)]);
+        assert_eq!(p.eval(cr(-1.0)), cr(0.0));
+    }
     #[test]
     fn test_roots_quadratic() {
         let p = Polynomial::new(arr![cr(1.0), cr(3.0), cr(2.0)]);
-        let r = p.roots();
-        dbg!(r);
+        assert_eq!(p.roots(), [cr(-0.5), cr(-1.0)]);
+        let p = Polynomial::new(arr![cr(1.0), cr(1.0), cr(1.0)]);
+        assert_eq!(p.roots(), [c32(-0.5, 0.8660254), c32(-0.5, -0.8660254)]);
+        // TODO: test polynomial with complex coefficients
     }
     #[test]
     fn test_newton_method() {

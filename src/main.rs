@@ -2,7 +2,7 @@ use std::io::stdin;
 
 use generic_array::arr;
 use num::complex::c32;
-use polynom::Polynomial;
+use polynom::{Polynomial, cr};
 
 fn main() {
     println!("Type 4 coefficients, space separated:");
@@ -10,9 +10,9 @@ fn main() {
     stdin().read_line(&mut s).unwrap();
     let a = s.split_whitespace();
     let mut b = a.map(|x| x.parse::<f32>().unwrap());
-    let mut p = arr![0.0;4];
+    let mut p = arr![cr(0.0);4];
     for i in 0..4 {
-        p[i] = b.next().unwrap();
+        p[i].re = b.next().unwrap();
     }
     let p = Polynomial::new(p);
     let d = p.der();
